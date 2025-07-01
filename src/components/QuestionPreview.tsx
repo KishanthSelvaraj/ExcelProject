@@ -91,14 +91,15 @@ export const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                       {index + 1}
                     </span>
                     <p className="text-gray-900 font-medium leading-relaxed">
-                      {question.question_name}
+                    {(question.question_name || '').replace(/[\r\n]+/g, ' ').trim()}
                     </p>
                   </div>
                 </div>
                 
                 <div className="ml-8 space-y-2">
-                  {options.map((option: string, optIndex: number) => {
-                    const isCorrect = answer === option;
+                {options.map((option: string, optIndex: number) => {
+  const cleanOption = option.replace(/[\r\n]+/g, ' ').trim();
+  const isCorrect = answer === cleanOption;
                     return (
                       <div key={optIndex} className="flex items-center space-x-2">
                         {isCorrect ? (
@@ -107,8 +108,8 @@ export const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                           <Circle className="w-4 h-4 text-gray-300" />
                         )}
                         <span className={`text-sm ${isCorrect ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
-                          {String.fromCharCode(65 + optIndex)}. {option}
-                        </span>
+  {String.fromCharCode(65 + optIndex)}. {cleanOption}
+</span>
                       </div>
                     );
                   })}
