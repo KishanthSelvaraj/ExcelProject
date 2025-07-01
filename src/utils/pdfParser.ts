@@ -29,15 +29,21 @@ const extractQuestionData = (text: string): Question[] => {
     const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
     if (lines.length < 2) continue;
 
-    const questionText = cleanText(lines[0]);
+    // Find the index where options start (first line that matches option pattern)
+    let optionStartIdx = lines.findIndex(line => /^([@©●◉○O])\s*(.+)/.test(line));
+    if (optionStartIdx === -1) continue;
+
+    // Join all lines before the first option as the question text
+    const questionTextRaw = lines.slice(0, optionStartIdx).join(' ');
+    const questionText = cleanText(questionTextRaw.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim());
     const options: string[] = [];
     let answer = '';
 
-    for (const line of lines.slice(1)) {
+    for (const line of lines.slice(optionStartIdx)) {
       // Match radio indicators: ◉, ○, ●, O, @, etc.
       const match = line.match(/^([@©●◉○O])\s*(.+)/);
       if (match) {
-        const opt = cleanText(match[2]);
+        const opt = cleanText(match[2].replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim());
         options.push(opt);
         // Filled symbols indicate the answer
         if (match[1] === '●' || match[1] === '◉' || match[1] === '@' || match[1] === 'O') {
@@ -53,7 +59,7 @@ const extractQuestionData = (text: string): Question[] => {
         weightage: '',
         question_name: questionText,
         options: `[${options.join(',')}]`, // No quotes, just comma separated
-        answer: answer ? `[${answer}]` : '[]' // No quotes, just value
+        answer: answer // Just the plain answer string
       });
     }
   }
